@@ -45,7 +45,6 @@ provider "aws" {
   region = "us-west-1"
 }
 
-
 Explanation:
 •	Defines AWS region where resources will be created
 •	Region must be inside quotes
