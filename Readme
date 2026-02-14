@@ -44,7 +44,6 @@ Correct Code:
 provider "aws" {
   region = "us-west-1"
 }
-
 Explanation:
 •	Defines AWS region where resources will be created
 •	Region must be inside quotes
@@ -201,14 +200,7 @@ Type:
 Yes
  
 Step 5: Check Created Resources
- 
- 
-  
- 
- 
- 
-
-________________________________________
+_________________________________
 15. Destroy All Resources (Optional Cleanup)
 terraform destroy
  
