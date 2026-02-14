@@ -1,0 +1,230 @@
+Complete Terraform Documentation for AWS VPC + Subnet + Route Table + Security Group + EC2 (Step-by-Step Guide)
+
+1. Project Title
+
+Terraform Infrastructure Setup on AWS (VPC, Subnets, Internet Gateway, Route Tables, Security Group, and EC2 Instance)
+________________________________________
+2. Project Objective
+The main objective of this project is to create a complete AWS infrastructure using Terraform. This includes:
+•	Custom VPC
+•	Public and Private Subnets
+•	Internet Gateway
+•	Route Tables and Associations
+•	Security Group (SSH Access)
+•	EC2 Instance Deployment
+This project is useful for DevOps, Cloud Computing, and MCA final year practical implementation.
+________________________________________
+3. Prerequisites (Before Starting)
+You must install and configure the following:
+3.1 Install Terraform
+Check installation:
+terraform -version
+3.2 Install AWS CLI
+Check:
+aws --version
+3.3 Configure AWS Credentials
+Command:
+aws configure
+Enter:
+•	Access Key
+•	Secret Key
+•	Region (example: us-west-1)
+•	Output format: json
+________________________________________
+4. Project Folder Structure
+Recommended structure:
+terraform-project/
+├── provider.tf
+├── vpc.tf
+├── ec2.tf
+________________________________________
+5. Provider Configuration (Very Important)
+File: provider.tf
+Correct Code:
+provider "aws" {
+  region = "us-west-1"
+}
+
+
+Explanation:
+•	Defines AWS region where resources will be created
+•	Region must be inside quotes
+•	If region mismatch, resources will not appear in AWS console
+________________________________________
+6. VPC Configuration
+File: vpc.tf
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/21"
+  tags = {
+    Name = "vpc-1"
+  }
+}
+ 
+Explanation:
+•	Creates custom VPC
+•	CIDR block defines IP range of network
+•	/21 provides large IP pool
+________________________________________
+7. Subnet Configuration
+Subnets divide VPC into smaller networks.
+7.1 Public Subnet
+resource "aws_subnet" "pub_sub" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.0.0/22"
+  availability_zone = "us-west-1a"
+  tags = {
+    Name = "public-subnet"
+  }
+}
+ 
+7.2 Private Subnet
+resource "aws_subnet" "pri_sub" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.4.0/23"
+  availability_zone = "us-west-1c"
+  tags = {
+    Name = "private-subnet"
+  }
+}
+ 
+Important:
+•	Availability Zone must match region
+•	us-west-1 supports only us-west-1a and us-west-1c
+________________________________________
+8. Internet Gateway Configuration
+resource "aws_internet_gateway" "my_igw" {
+  vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "my-igw"
+  }
+}
+ 
+Purpose:
+•	Allows internet access to public subnet resources
+________________________________________
+9. Route Table Configuration (Public + Private)
+9.1 Private Route Table
+resource "aws_route_table" "my_rt" {
+  vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "private-rt"
+  }
+}
+ 
+9.2 Public Route Table
+resource "aws_route_table" "my_pubrt" {
+  vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "public-rt"
+  }
+}
+ 
+________________________________________
+10. Public Internet Route
+resource "aws_route" "public_route" {
+  route_table_id         = aws_route_table.my_pubrt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.my_igw.id
+}
+ 
+Explanation:
+•	0.0.0.0/0 means internet access
+•	Attached to Internet Gateway
+________________________________________
+11. Route Table Association
+11.1 Public Subnet Association
+resource "aws_route_table_association" "my_pubrta" {
+  route_table_id = aws_route_table.my_pubrt.id
+  subnet_id      = aws_subnet.pub_sub.id
+}
+ 
+11.2 Private Subnet Association
+resource "aws_route_table_association" "my_prta" {
+  route_table_id = aws_route_table.my_rt.id
+  subnet_id      = aws_subnet.pri_sub.id
+}
+ 
+________________________________________
+12. Security Group Configuration (Firewall)
+resource "aws_security_group" "my_sg" {
+  name        = "my_sg_1"
+  description = "Allow SSH access"
+  vpc_id      = aws_vpc.my_vpc.id
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+ 
+Explanation:
+•	Ingress: Allows SSH (Port 22)
+•	Egress: Allows all outgoing traffic
+________________________________________
+13. EC2 Instance Configuration (Final Step)
+File: ec2.tf
+resource "aws_instance" "inst_1" {
+  ami                         = "ami-0d53d72369335a9d6"
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.pub_sub.id
+  vpc_security_group_ids      = [aws_security_group.my_sg.id]
+  associate_public_ip_address = true
+  tags = {
+    Name = "terraform-ec2"
+  }
+}
+ 
+Important Notes:
+•	t2.micro = Free Tier eligible
+•	Must use public subnet for public IP
+•	AMI must match region (us-west-1)
+________________________________________
+14. Complete Terraform Execution Commands (Step-by-Step)
+Step 1: Initialize Terraform
+terraform init
+ 
+
+Step 2: Validate Code
+terraform validate
+Step 3: Plan Infrastructure
+terraform plan
+ 
+Step 4: Apply Configuration
+terraform apply
+Type:
+Yes
+ 
+Step 5: Check Created Resources
+ 
+ 
+  
+ 
+ 
+ 
+
+________________________________________
+15. Destroy All Resources (Optional Cleanup)
+terraform destroy
+ 
+Purpose:
+•	Avoid AWS billing
+•	Clean environment after project
+________________________________________
+16. Best Practices for Academic & DevOps Projects
+•	Use Free Tier resources
+•	Keep code modular (separate tf files)
+•	Add tags to all resources
+•	Use correct region and AZ
+•	Always run terraform validate before apply
+•	Store code in GitHub for version control
+________________________________________
+17. Final Conclusion
+This project demonstrates a complete real-world AWS infrastructure deployment using Terraform. It includes networking, security, routing, and compute services in an automated and scalable way. By fixing errors like undeclared resources, region mismatch, availability zone issues, and free-tier limitations, the infrastructure becomes stable, reproducible, and suitable for DevOps learning, cloud labs project.
+
