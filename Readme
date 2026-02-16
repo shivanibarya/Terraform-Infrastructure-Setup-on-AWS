@@ -75,7 +75,8 @@ resource "aws_subnet" "pub_sub" {
     Name = "public-subnet"
   }
 }
- 
+
+
 7.2 Private Subnet
 resource "aws_subnet" "pri_sub" {
   vpc_id            = aws_vpc.my_vpc.id
